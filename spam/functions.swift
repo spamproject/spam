@@ -1,6 +1,5 @@
 import Foundation
 
-// Call a shell command.
 func call(args: String...) {
     let task = NSTask()
     task.launchPath = "/usr/bin/env"
@@ -19,7 +18,7 @@ func call(args: String...) {
     }
 }
 
-// mkdir -p
+private let fileManager = NSFileManager()
 func mkdir(path: String, withIntermediateDirectories: Bool = true) {
     var error: NSError?
     fileManager.createDirectoryAtPath(
@@ -53,4 +52,15 @@ func repo(importStatement: String) -> String? {
     }
 
     return nil
+}
+
+func error(message: String) {
+    println("error: \(message)")
+    exit(1)
+}
+
+func usage() {
+    println("usage: spam [install|uninstall]")
+    println("")
+    println("Specify a package with \"import Module // username/repo\".")
 }

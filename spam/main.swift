@@ -1,14 +1,21 @@
-import Foundation
-
-let fileManager = NSFileManager.defaultManager()
-
-mkdir(".spam")
 let path = "example.swift"
 if let streamReader = StreamReader(path: path) {
-    if let line = streamReader.nextLine(), repository = repo(line) {
-        println(repository)
+    if let line = streamReader.nextLine() {
+        if let repository = repo(line) {
+            mkdir(".spam")
+            if (contains(Process.arguments, "install")) {
+                call("git", "clone", repository, ".spam/test")
+            } else if (contains(Process.arguments, "uninstall")) {
+                call("rm", "-rf", ".spam")
+            } else {
+                usage()
+            }
+        } else {
+            error("could not parse repository name")
+        }
+    } else {
+        error("\(path) was empty")
     }
 } else {
-    println("fatal: could not read \(path)")
-    exit(1)
+    error("could not read \(path)")
 }
