@@ -13,6 +13,7 @@ func call(args: String...) {
     let output = NSString(data: data, encoding: NSUTF8StringEncoding) as! String
     print(output)
 
+    task.waitUntilExit()
     if task.terminationStatus != 0 {
         exit(task.terminationStatus)
     }
