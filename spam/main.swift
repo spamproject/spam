@@ -1,17 +1,20 @@
 // MARK: subcommands
 
+let spamDirectory = ".spam"
+
 func install() {
-    func install(repository: String) {
-        mkdir(".spam")
-        call("git", "clone", repository, ".spam/test")
+    func install(repo: Repo) {
+        mkdir(spamDirectory)
+        let dest = spamDirectory + "/" + repo.username + "/" + repo.reponame
+        call("git", "clone", repo.path, dest)
     }
 
     let path = "example.swift"
     if let streamReader = StreamReader(path: path) {
         var line: String?
         while let line = streamReader.nextLine() {
-            if let repository = repo(line) {
-                install(repository)
+            if let repo = Repo(importStatement: line) {
+                install(repo)
             }
         }
     } else {
@@ -20,7 +23,7 @@ func install() {
 }
 
 func uninstall() {
-    call("rm", "-rf", ".spam")
+    call("rm", "-rf", spamDirectory)
 }
 
 // MARK: entry point
