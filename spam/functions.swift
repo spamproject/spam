@@ -40,18 +40,15 @@ func lastIndexOf(target: UnicodeScalar, inString string: String) -> Int? {
     }
 }
 
-// Parse a GitHub repository from a commented import statement.
+// Attempt to parse a GitHub repository from a commented import statement.
 func repo(importStatement: String) -> String? {
-    if let spaceIndex = lastIndexOf(" ", inString: importStatement) {
-        let length = count(importStatement)
-        let start = advance(importStatement.startIndex, spaceIndex + 1)
-        let end = importStatement.endIndex
-        let nameRange = Range<String.Index>(start: start, end: end)
-        let name = importStatement.substringWithRange(nameRange)
-        return "https://github.com/\(name).git"
+    if let nameRange = importStatement.rangeOfString("[^\\s/]+/[^\\s/]+$",
+        options: .RegularExpressionSearch) {
+            let name = importStatement.substringWithRange(nameRange)
+            return "https://github.com/\(name).git"
+    } else {
+        return nil
     }
-
-    return nil
 }
 
 func error(message: String) {
