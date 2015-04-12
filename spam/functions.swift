@@ -51,6 +51,11 @@ func repo(importStatement: String) -> String? {
     }
 }
 
+func isBlank(string: String) -> Bool {
+    return string.stringByTrimmingCharactersInSet(
+        .whitespaceAndNewlineCharacterSet()).isEmpty
+}
+
 func error(message: String) {
     println("error: \(message)")
     exit(1)
