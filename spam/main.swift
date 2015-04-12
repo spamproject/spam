@@ -39,12 +39,27 @@ func uninstall() {
     call("rm", "-rf", spamDirectory)
 }
 
+func compile() {
+    mkdir("\(spamDirectory)/build")
+    call("swiftc", "-emit-library", "-emit-object",
+         ".spam/aclissold/Module/Module.swift", "-module-name", "Module", "-o",
+         ".spam/build/Module.o")
+    call("ar", "rcs", "libmodule.a", ".spam/build/Module.o")
+    call("mv", "libmodule.a", ".spam/build/")
+    call("swiftc", "-emit-module", ".spam/aclissold/Module/Module.swift",
+         "-module-name", "Module", "-o", ".spam/build/")
+    call("swiftc", "-I", ".spam/build", "-L", ".spam/build", "-lmodule",
+         "example.swift")
+}
+
 // MARK: entry point
 
 if contains(Process.arguments, "install") || contains(Process.arguments, "i") {
     install()
 } else if contains(Process.arguments, "uninstall") || contains(Process.arguments, "u") {
     uninstall()
+} else if contains(Process.arguments, "compile") || contains(Process.arguments, "c") {
+    compile()
 } else {
     usage()
 }
