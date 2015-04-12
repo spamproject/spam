@@ -1,12 +1,23 @@
-// MARK: subcommands
+import Foundation
 
 let spamDirectory = ".spam"
 
+private extension Repo {
+    var installPath: String {
+        get {
+            return spamDirectory + "/" + username + "/" + reponame
+        }
+    }
+}
+
+// MARK: subcommands
+
 func install() {
+    let fileManager = NSFileManager()
+
     func install(repo: Repo) {
         mkdir(spamDirectory)
-        let dest = spamDirectory + "/" + repo.username + "/" + repo.reponame
-        call("git", "clone", repo.path, dest)
+        call("git", "clone", repo.path, repo.installPath)
     }
 
     let path = "example.swift"
@@ -14,7 +25,9 @@ func install() {
         var line: String?
         while let line = streamReader.nextLine() {
             if let repo = Repo(importStatement: line) {
-                install(repo)
+                if !fileManager.fileExistsAtPath(repo.installPath) {
+                    install(repo)
+                }
             }
         }
     } else {
