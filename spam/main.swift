@@ -41,9 +41,9 @@ func uninstall() {
 
 // MARK: entry point
 
-if contains(Process.arguments, "install") {
+if contains(Process.arguments, "install") || contains(Process.arguments, "i") {
     install()
-} else if contains(Process.arguments, "uninstall") {
+} else if contains(Process.arguments, "uninstall") || contains(Process.arguments, "u") {
     uninstall()
 } else {
     usage()
