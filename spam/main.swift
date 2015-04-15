@@ -44,14 +44,16 @@ func compile(moduleName: String) {
     let m = moduleName.lowercaseString
 
     mkdir("\(spamDirectory)/build")
+    mkdir("\(spamDirectory)/lib")
+
     call("swiftc", "-emit-library", "-emit-object",
          ".spam/aclissold/\(M)/\(M).swift", "-module-name", M, "-o",
          ".spam/build/\(M).o")
     call("ar", "rcs", "lib\(m).a", ".spam/build/\(M).o")
-    call("mv", "lib\(m).a", ".spam/build/")
+    call("mv", "lib\(m).a", ".spam/lib/")
     call("swiftc", "-emit-module", ".spam/aclissold/\(M)/\(M).swift",
-         "-module-name", "\(M)", "-o", ".spam/build/")
-    call("swiftc", "-I", ".spam/build", "-L", ".spam/build", "-l\(m)",
+         "-module-name", "\(M)", "-o", ".spam/lib/")
+    call("swiftc", "-I", ".spam/lib", "-L", ".spam/lib", "-l\(m)",
          "example.swift")
 }
 
