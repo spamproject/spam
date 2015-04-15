@@ -42,18 +42,19 @@ func uninstall() {
 func compile(moduleName: String) {
     let M = moduleName
     let m = moduleName.lowercaseString
+    let s = spamDirectory
 
-    mkdir("\(spamDirectory)/build")
-    mkdir("\(spamDirectory)/lib")
+    mkdir("\(s)/build")
+    mkdir("\(s)/lib")
 
     call("swiftc", "-emit-library", "-emit-object",
-         ".spam/aclissold/\(M)/\(M).swift", "-module-name", M, "-o",
-         ".spam/build/\(M).o")
-    call("ar", "rcs", "lib\(m).a", ".spam/build/\(M).o")
-    call("mv", "lib\(m).a", ".spam/lib/")
-    call("swiftc", "-emit-module", ".spam/aclissold/\(M)/\(M).swift",
-         "-module-name", "\(M)", "-o", ".spam/lib/")
-    call("swiftc", "-I", ".spam/lib", "-L", ".spam/lib", "-l\(m)",
+         "\(s)/aclissold/\(M)/\(M).swift", "-module-name", M, "-o",
+         "\(s)/build/\(M).o")
+    call("ar", "rcs", "lib\(m).a", "\(s)/build/\(M).o")
+    call("mv", "lib\(m).a", "\(s)/lib/")
+    call("swiftc", "-emit-module", "\(s)/aclissold/\(M)/\(M).swift",
+         "-module-name", "\(M)", "-o", "\(s)/lib/")
+    call("swiftc", "-I", "\(s)/lib", "-L", "\(s)/lib", "-l\(m)",
          "example.swift")
 }
 
