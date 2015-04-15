@@ -52,7 +52,7 @@ func error(message: String) {
 }
 
 func usage() {
-    println("usage: spam [install|uninstall]")
+    println("usage: spam [install|uninstall|compile]")
     println("")
     println("Specify a package with \"import Module // username/repo\".")
 }
