@@ -1,9 +1,9 @@
 import Foundation
 
-func call(args: String...) {
+func call(command: String) {
     let task = NSTask()
     task.launchPath = "/usr/bin/env"
-    task.arguments = args
+    task.arguments = split(command) { $0 == " " }
 
     let pipe = NSPipe()
     task.standardOutput = pipe

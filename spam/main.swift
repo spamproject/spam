@@ -17,7 +17,7 @@ func install() {
 
     func install(repo: Repo) {
         mkdir(spamDirectory)
-        call("git", "clone", repo.path, repo.installPath)
+        call("git clone \(repo.path) \(repo.installPath)")
     }
 
     let path = "example.swift"
@@ -36,7 +36,21 @@ func install() {
 }
 
 func uninstall() {
-    call("rm", "-rf", spamDirectory)
+    call("rm -rf \(spamDirectory)")
+}
+
+func compile(#modules: [String], mainFile: String = "main.swift") {
+    let s = spamDirectory
+    mkdir("\(s)/build")
+    mkdir("\(s)/lib")
+
+    var command = "swiftc -I \(s)/lib -L \(s)/lib "
+    for module in modules {
+        compile(module)
+        command += "-l\(module.lowercaseString) "
+    }
+
+    call("\(command) \(mainFile)")
 }
 
 func compile(moduleName: String) {
@@ -44,18 +58,12 @@ func compile(moduleName: String) {
     let m = moduleName.lowercaseString
     let s = spamDirectory
 
-    mkdir("\(s)/build")
-    mkdir("\(s)/lib")
-
-    call("swiftc", "-emit-library", "-emit-object",
-         "\(s)/aclissold/\(M)/\(M).swift", "-module-name", M, "-o",
-         "\(s)/build/\(M).o")
-    call("ar", "rcs", "lib\(m).a", "\(s)/build/\(M).o")
-    call("mv", "lib\(m).a", "\(s)/lib/")
-    call("swiftc", "-emit-module", "\(s)/aclissold/\(M)/\(M).swift",
-         "-module-name", "\(M)", "-o", "\(s)/lib/")
-    call("swiftc", "-I", "\(s)/lib", "-L", "\(s)/lib", "-l\(m)",
-         "example.swift")
+    call("swiftc -emit-library -emit-object \(s)/aclissold/\(M)/\(M).swift " +
+         "-module-name \(M) -o \(s)/build/\(M).o")
+    call("ar rcs lib\(m).a \(s)/build/\(M).o")
+    call("mv lib\(m).a \(s)/lib/")
+    call("swiftc -emit-module \(s)/aclissold/\(M)/\(M).swift " +
+         "-module-name \(M) -o \(s)/lib/")
 }
 
 // MARK: entry point
@@ -65,7 +73,7 @@ if contains(Process.arguments, "install") || contains(Process.arguments, "i") {
 } else if contains(Process.arguments, "uninstall") || contains(Process.arguments, "u") {
     uninstall()
 } else if contains(Process.arguments, "compile") || contains(Process.arguments, "c") {
-    compile("Module")
+    compile(modules: ["Module"], mainFile: "example.swift")
 } else {
     usage()
 }
