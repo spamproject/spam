@@ -39,16 +39,19 @@ func uninstall() {
     call("rm", "-rf", spamDirectory)
 }
 
-func compile() {
+func compile(moduleName: String) {
+    let M = moduleName
+    let m = moduleName.lowercaseString
+
     mkdir("\(spamDirectory)/build")
     call("swiftc", "-emit-library", "-emit-object",
-         ".spam/aclissold/Module/Module.swift", "-module-name", "Module", "-o",
-         ".spam/build/Module.o")
-    call("ar", "rcs", "libmodule.a", ".spam/build/Module.o")
-    call("mv", "libmodule.a", ".spam/build/")
-    call("swiftc", "-emit-module", ".spam/aclissold/Module/Module.swift",
-         "-module-name", "Module", "-o", ".spam/build/")
-    call("swiftc", "-I", ".spam/build", "-L", ".spam/build", "-lmodule",
+         ".spam/aclissold/\(M)/\(M).swift", "-module-name", M, "-o",
+         ".spam/build/\(M).o")
+    call("ar", "rcs", "lib\(m).a", ".spam/build/\(M).o")
+    call("mv", "lib\(m).a", ".spam/build/")
+    call("swiftc", "-emit-module", ".spam/aclissold/\(M)/\(M).swift",
+         "-module-name", "\(M)", "-o", ".spam/build/")
+    call("swiftc", "-I", ".spam/build", "-L", ".spam/build", "-l\(m)",
          "example.swift")
 }
 
@@ -59,7 +62,7 @@ if contains(Process.arguments, "install") || contains(Process.arguments, "i") {
 } else if contains(Process.arguments, "uninstall") || contains(Process.arguments, "u") {
     uninstall()
 } else if contains(Process.arguments, "compile") || contains(Process.arguments, "c") {
-    compile()
+    compile("Module")
 } else {
     usage()
 }
