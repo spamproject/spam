@@ -11,6 +11,22 @@ private extension Repo {
     }
 }
 
+func findRepos(path: String) -> [Repo]? {
+    var repos: [Repo]?
+    if let streamReader = StreamReader(path: path) {
+        var line: String?
+        while let line = streamReader.nextLine() {
+            if let repo = Repo(importStatement: line) {
+                if repos == nil { repos = [Repo]() }
+                repos!.append(repo)
+            }
+        }
+    } else {
+        error("could not read \(path)")
+    }
+    return repos
+}
+
 // MARK: subcommands
 
 func install() {
@@ -22,17 +38,14 @@ func install() {
     }
 
     let path = "example.swift"
-    if let streamReader = StreamReader(path: path) {
-        var line: String?
-        while let line = streamReader.nextLine() {
-            if let repo = Repo(importStatement: line) {
-                if !fileManager.fileExistsAtPath(repo.installPath) {
-                    install(repo)
-                }
+    if let repos = findRepos(path) {
+        for repo in repos {
+            if !fileManager.fileExistsAtPath(repo.installPath) {
+                install(repo)
             }
         }
     } else {
-        error("could not read \(path)")
+        error("could not find any installable modules")
     }
 }
 
