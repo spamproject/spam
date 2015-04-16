@@ -33,6 +33,23 @@ func mkdir(path: String, withIntermediateDirectories: Bool = true) {
     }
 }
 
+// Returns a space-separated list of .type files at path.
+func filesOfType(type: String, atPath path: String) -> String? {
+    if let contents: [String] = fileManager.contentsOfDirectoryAtPath(path, error: nil) as? [String] {
+        let predicate = NSPredicate(format: "pathExtension='\(type)'")
+        let filesArray = contents.filter { predicate.evaluateWithObject($0) }
+
+        var fullPathFilesArray = [String]()
+        for file in filesArray {
+            fullPathFilesArray.append("\(path)/\(file)")
+        }
+        let files = join(" ", fullPathFilesArray)
+        return files
+    }
+
+    return nil
+}
+
 func lastIndexOf(target: UnicodeScalar, inString string: String) -> Int? {
     let character = Int32(bitPattern: target.value)
     return string.withCString { cString -> Int? in

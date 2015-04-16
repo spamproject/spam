@@ -55,7 +55,6 @@ func uninstall() {
 
 func compile(repos: [Repo], mainFile: String = "main.swift") {
     let s = spamDirectory
-    mkdir("\(s)/build")
     mkdir("\(s)/lib")
 
     var command = "\(swiftc) -I \(s)/lib -L \(s)/lib "
@@ -73,12 +72,22 @@ func compile(repo: Repo) {
     let u = repo.username
     let s = spamDirectory
 
-    call("\(swiftc) -emit-library -emit-object " +
-         "\(s)/\(u)/\(M)/\(M)/\(M).swift -module-name \(M) -o \(s)/build/\(M).o")
-    call("ar rcs lib\(m).a \(s)/build/\(M).o")
-    call("mv lib\(m).a \(s)/lib/")
-    call("\(swiftc) -emit-module \(s)/\(u)/\(M)/\(M)/\(M).swift " +
-         "-module-name \(M) -o \(s)/lib/")
+    let path = "\(s)/\(u)/\(M)/\(M)"
+    if let sourceFiles = filesOfType("swift", atPath: path) {
+        call("\(swiftc) -emit-library -emit-object " +
+             "\(sourceFiles) -module-name \(M)")
+        if let objectFiles = filesOfType("o", atPath: ".") {
+            call("ar rcs lib\(m).a \(objectFiles)")
+            call("rm \(objectFiles)")
+            call("mv lib\(m).a \(s)/lib/")
+            call("\(swiftc) -emit-module \(sourceFiles) " +
+                 "-module-name \(M) -o \(s)/lib/")
+        } else {
+            error("could not find object files")
+        }
+    } else {
+        error("could not find any Swift files in \(path)")
+    }
 }
 
 func usage() {
