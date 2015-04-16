@@ -50,9 +50,3 @@ func error(message: String) {
     println("error: \(message)")
     exit(1)
 }
-
-func usage() {
-    println("usage: spam [install|uninstall|compile]")
-    println("")
-    println("Specify a package with \"import Module // username/repo\".")
-}

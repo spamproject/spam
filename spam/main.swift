@@ -81,6 +81,12 @@ func compile(repo: Repo) {
          "-module-name \(M) -o \(s)/lib/")
 }
 
+func usage() {
+    println("usage: spam [install|uninstall|compile]")
+    println("")
+    println("Specify a package with \"import Module // username/repo\".")
+}
+
 // MARK: entry point
 
 if contains(Process.arguments, "install") || contains(Process.arguments, "i") {
