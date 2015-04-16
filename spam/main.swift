@@ -6,7 +6,7 @@ let swiftc = "xcrun -sdk macosx swiftc"
 private extension Repo {
     var installPath: String {
         get {
-            return spamDirectory + "/" + username + "/" + reponame
+            return spamDirectory + "/src/" + username + "/" + reponame
         }
     }
 }
@@ -33,7 +33,7 @@ func install() {
     let fileManager = NSFileManager()
 
     func install(repo: Repo) {
-        mkdir(spamDirectory)
+        mkdir("\(spamDirectory)/src")
         call("git clone \(repo.path) \(repo.installPath)")
     }
 
@@ -72,7 +72,7 @@ func compile(repo: Repo) {
     let u = repo.username
     let s = spamDirectory
 
-    let path = "\(s)/\(u)/\(M)/\(M)"
+    let path = "\(s)/src/\(u)/\(M)/\(M)"
     if let sourceFiles = filesOfType("swift", atPath: path) {
         call("\(swiftc) -emit-library -emit-object " +
              "\(sourceFiles) -module-name \(M)")
