@@ -1,3 +1,9 @@
+/*
+    spam install
+    spam compile
+    ./example
+*/
+
 import Module        // aclissold/Module
 import AnotherModule // aclissold/AnotherModule
 
