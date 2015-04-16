@@ -73,11 +73,11 @@ func compile(repo: Repo) {
     let u = repo.username
     let s = spamDirectory
 
-    call("\(swiftc) -emit-library -emit-object \(s)/\(u)/\(M)/\(M).swift " +
-         "-module-name \(M) -o \(s)/build/\(M).o")
+    call("\(swiftc) -emit-library -emit-object " +
+         "\(s)/\(u)/\(M)/\(M)/\(M).swift -module-name \(M) -o \(s)/build/\(M).o")
     call("ar rcs lib\(m).a \(s)/build/\(M).o")
     call("mv lib\(m).a \(s)/lib/")
-    call("\(swiftc) -emit-module \(s)/\(u)/\(M)/\(M).swift " +
+    call("\(swiftc) -emit-module \(s)/\(u)/\(M)/\(M)/\(M).swift " +
          "-module-name \(M) -o \(s)/lib/")
 }
 
