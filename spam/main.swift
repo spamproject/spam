@@ -53,30 +53,31 @@ func uninstall() {
     call("rm -rf \(spamDirectory)")
 }
 
-func compile(#modules: [String], mainFile: String = "main.swift") {
+func compile(repos: [Repo], mainFile: String = "main.swift") {
     let s = spamDirectory
     mkdir("\(s)/build")
     mkdir("\(s)/lib")
 
     var command = "\(swiftc) -I \(s)/lib -L \(s)/lib "
-    for module in modules {
-        compile(module)
-        command += "-l\(module.lowercaseString) "
+    for repo in repos {
+        compile(repo)
+        command += "-l\(repo.reponame.lowercaseString) "
     }
 
     call("\(command) \(mainFile)")
 }
 
-func compile(moduleName: String) {
-    let M = moduleName
-    let m = moduleName.lowercaseString
+func compile(repo: Repo) {
+    let M = repo.reponame // Module
+    let m = repo.reponame.lowercaseString // module
+    let u = repo.username
     let s = spamDirectory
 
-    call("\(swiftc) -emit-library -emit-object \(s)/aclissold/\(M)/\(M).swift " +
+    call("\(swiftc) -emit-library -emit-object \(s)/\(u)/\(M)/\(M).swift " +
          "-module-name \(M) -o \(s)/build/\(M).o")
     call("ar rcs lib\(m).a \(s)/build/\(M).o")
     call("mv lib\(m).a \(s)/lib/")
-    call("\(swiftc) -emit-module \(s)/aclissold/\(M)/\(M).swift " +
+    call("\(swiftc) -emit-module \(s)/\(u)/\(M)/\(M).swift " +
          "-module-name \(M) -o \(s)/lib/")
 }
 
@@ -87,7 +88,11 @@ if contains(Process.arguments, "install") || contains(Process.arguments, "i") {
 } else if contains(Process.arguments, "uninstall") || contains(Process.arguments, "u") {
     uninstall()
 } else if contains(Process.arguments, "compile") || contains(Process.arguments, "c") {
-    compile(modules: ["Module", "AnotherModule"], mainFile: "example.swift")
+    if let repos = findRepos("example.swift") {
+        compile(repos, mainFile: "example.swift")
+    } else {
+        error("could not find any installable modules")
+    }
 } else {
     usage()
 }
