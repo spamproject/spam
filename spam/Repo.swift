@@ -13,7 +13,7 @@ class Repo {
     }
 
     convenience init?(importStatement: String) {
-        if importStatement.rangeOfString("import",
+        if importStatement.rangeOfString("^import",
         options: .RegularExpressionSearch) != nil,
         let nameRange = importStatement.rangeOfString("[^\\s/]+/[^\\s/]+$",
         options: .RegularExpressionSearch) {
