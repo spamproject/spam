@@ -53,7 +53,7 @@ func uninstall() {
     call("rm -rf \(spamDirectory)")
 }
 
-func compile(repos: [Repo], mainFile: String = "main.swift") {
+func compile(repos: [Repo]) {
     let s = spamDirectory
     mkdir("\(s)/lib")
 
@@ -63,7 +63,11 @@ func compile(repos: [Repo], mainFile: String = "main.swift") {
         command += "-l\(repo.reponame.lowercaseString) "
     }
 
-    call("\(command) \(mainFile)")
+    if let sourceFiles = filesOfType("swift", atPath: ".") {
+        call("\(command) \(sourceFiles)")
+    } else {
+        error("could not find any Swift files in the current directory")
+    }
 }
 
 func compile(repo: Repo) {
@@ -104,7 +108,7 @@ if contains(Process.arguments, "install") || contains(Process.arguments, "i") {
     uninstall()
 } else if contains(Process.arguments, "compile") || contains(Process.arguments, "c") {
     if let repos = findRepos("example.swift") {
-        compile(repos, mainFile: "example.swift")
+        compile(repos)
     } else {
         error("could not find any installable modules")
     }
