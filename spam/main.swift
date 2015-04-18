@@ -37,15 +37,18 @@ func install() {
         call("git clone \(repo.path) \(repo.installPath)")
     }
 
-    let path = "example.swift"
-    if let repos = findRepos(path) {
-        for repo in repos {
-            if !fileManager.fileExistsAtPath(repo.installPath) {
-                install(repo)
+    if let sourceFiles = filesOfType("swift", atPath: ".") {
+        for file in split(sourceFiles, isSeparator: { $0 == " " }) {
+            if let repos = findRepos(file) {
+                for repo in repos {
+                    if !fileManager.fileExistsAtPath(repo.installPath) {
+                        install(repo)
+                    }
+                }
             }
         }
     } else {
-        error("could not find any installable modules")
+        error("could not find any Swift files in the current directory")
     }
 }
 
@@ -107,8 +110,12 @@ if contains(Process.arguments, "install") || contains(Process.arguments, "i") {
 } else if contains(Process.arguments, "uninstall") || contains(Process.arguments, "u") {
     uninstall()
 } else if contains(Process.arguments, "compile") || contains(Process.arguments, "c") {
-    if let repos = findRepos("example.swift") {
-        compile(repos)
+    if let sourceFiles = filesOfType("swift", atPath: ".") {
+        for file in split(sourceFiles, isSeparator: { $0 == " " }) {
+            if let repos = findRepos(file) {
+                compile(repos)
+            }
+        }
     } else {
         error("could not find any installable modules")
     }
