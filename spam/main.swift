@@ -11,14 +11,13 @@ private extension Repo {
     }
 }
 
-func findRepos(path: String) -> [Repo]? {
-    var repos: [Repo]?
+func findRepos(path: String) -> [Repo] {
+    var repos = [Repo]()
     if let streamReader = StreamReader(path: path) {
         var line: String?
         while let line = streamReader.nextLine() {
             if let repo = Repo(importStatement: line) {
-                if repos == nil { repos = [Repo]() }
-                repos!.append(repo)
+                repos.append(repo)
             }
         }
     } else {
@@ -39,11 +38,10 @@ func install() {
 
     if let sourceFiles = filesOfType("swift", atPath: ".") {
         for file in split(sourceFiles, isSeparator: { $0 == " " }) {
-            if let repos = findRepos(file) {
-                for repo in repos {
-                    if !fileManager.fileExistsAtPath(repo.installPath) {
-                        install(repo)
-                    }
+            let repos = findRepos(file)
+            for repo in repos {
+                if !fileManager.fileExistsAtPath(repo.installPath) {
+                    install(repo)
                 }
             }
         }
@@ -56,7 +54,7 @@ func uninstall() {
     call("rm -rf \(spamDirectory)")
 }
 
-func compile(repos: [Repo]) {
+func compile(repos: [Repo]) -> String {
     let s = spamDirectory
     mkdir("\(s)/lib")
 
@@ -65,11 +63,11 @@ func compile(repos: [Repo]) {
         compile(repo)
         command += "-l\(repo.reponame.lowercaseString) "
     }
-
     if let sourceFiles = filesOfType("swift", atPath: ".") {
-        call("\(command) \(sourceFiles)")
+        return "\(command) \(sourceFiles)"
     } else {
         error("could not find any Swift files in the current directory")
+        return "" // never called; to make the compiler happy
     }
 }
 
@@ -111,10 +109,13 @@ if contains(Process.arguments, "install") || contains(Process.arguments, "i") {
     uninstall()
 } else if contains(Process.arguments, "compile") || contains(Process.arguments, "c") {
     if let sourceFiles = filesOfType("swift", atPath: ".") {
+        var finalCompilationCommand: String?
         for file in split(sourceFiles, isSeparator: { $0 == " " }) {
-            if let repos = findRepos(file) {
-                compile(repos)
-            }
+            let repos = findRepos(file)
+            finalCompilationCommand = compile(repos)
+        }
+        if finalCompilationCommand != nil {
+            call(finalCompilationCommand!)
         }
     } else {
         error("could not find any installable modules")
