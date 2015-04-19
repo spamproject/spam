@@ -1,5 +1,7 @@
 import Foundation
 
+import CommandLine // jatoben/CommandLine
+
 let spamDirectory = ".spam"
 let swiftc = "xcrun -sdk macosx swiftc"
 
@@ -96,7 +98,7 @@ func uninstall() {
     call("rm -rf \(spamDirectory)")
 }
 
-func compile() {
+func compile(#outputFile: String?) {
     if let sourceFiles = filesOfType("swift", atPath: ".") {
         var modules = [Module]()
         for file in split(sourceFiles, isSeparator: { $0 == " " }) {
@@ -104,7 +106,11 @@ func compile() {
         }
         if count(modules) > 0 {
             let finalCompilationCommand = compile(modules)
-            call(finalCompilationCommand)
+            if outputFile != nil {
+                call("\(finalCompilationCommand) -o \(outputFile!)")
+            } else {
+                call(finalCompilationCommand)
+            }
         } else {
             error("could not find any installable modules")
         }
@@ -113,20 +119,38 @@ func compile() {
     }
 }
 
-func usage() {
-    println("usage: spam [install|uninstall|compile]")
-    println("")
-    println("Specify a package with \"import Module // username/module\".")
-}
-
 // MARK: entry point
 
-if contains(Process.arguments, "install") || contains(Process.arguments, "i") {
+let cli = CommandLine()
+let installOption = BoolOption(shortFlag: "i", longFlag: "install", helpMessage:
+          "Download all imported modules. For spam to detect the module's URL, it must be\n" +
+    "      specified in the following manner:\n" +
+    "          import ModuleName // username/ModuleName\n" +
+    "      This will automatically clone the module from github.com/username/ModuleName.")
+let compileOption = BoolOption(shortFlag: "c", longFlag: "compile",
+    helpMessage: "Compile downloaded modules and local sources.")
+let outputOption = StringOption(shortFlag: "o", longFlag: "output", required: false,
+    helpMessage: "Write output to <file>.")
+let uninstallOption = BoolOption(shortFlag: "u", longFlag: "uninstall",
+    helpMessage: "Completely remove the .spam directory.")
+let helpOption = BoolOption(shortFlag: "h", longFlag: "help",
+    helpMessage: "Display this help message and exit.")
+cli.addOptions(installOption, compileOption, outputOption, uninstallOption, helpOption)
+
+let (success, error) = cli.parse()
+if (!success) {
+    println(error!)
+    cli.printUsage()
+    exit(EX_USAGE)
+}
+
+if installOption.value {
     install()
-} else if contains(Process.arguments, "uninstall") || contains(Process.arguments, "u") {
+} else if uninstallOption.value {
     uninstall()
-} else if contains(Process.arguments, "compile") || contains(Process.arguments, "c") {
-    compile()
+} else if compileOption.value {
+    compile(outputFile: outputOption.value)
 } else {
-    usage()
+    cli.printUsage()
+    exit(EX_USAGE)
 }
