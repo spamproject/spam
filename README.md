@@ -20,8 +20,8 @@ cd spam
 git checkout bootstrap
 xcrun -sdk macosx swiftc *.swift -o spam
 git checkout master
-./spam --install
-./spam --compile --output spam
+./spam install
+./spam compile
 ```
 
 Then put spam somewhere on your path, e.g. `mv spam /usr/local/bin`.
