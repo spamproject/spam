@@ -98,16 +98,19 @@ func uninstall() {
 
 func compile() {
     if let sourceFiles = filesOfType("swift", atPath: ".") {
-        var finalCompilationCommand: String?
+        var modules = [Module]()
         for file in split(sourceFiles, isSeparator: { $0 == " " }) {
-            let modules = findModules(file)
-            finalCompilationCommand = compile(modules)
+            modules += findModules(file)
         }
-        if finalCompilationCommand != nil {
-            call(finalCompilationCommand!)
+        if count(modules) > 0 {
+            let finalCompilationCommand = compile(modules)
+            println(finalCompilationCommand)
+            call(finalCompilationCommand)
+        } else {
+            error("could not find any installable modules")
         }
     } else {
-        error("could not find any installable modules")
+        error("could not find any Swift files in the current directory")
     }
 }
 
