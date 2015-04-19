@@ -11,6 +11,8 @@ private extension Module {
     }
 }
 
+// MARK: helper functions
+
 func findModules(path: String) -> [Module] {
     var modules = [Module]()
     if let streamReader = StreamReader(path: path) {
@@ -24,34 +26,6 @@ func findModules(path: String) -> [Module] {
         error("could not read \(path)")
     }
     return modules
-}
-
-// MARK: subcommands
-
-func install() {
-    let fileManager = NSFileManager()
-
-    func install(module: Module) {
-        mkdir("\(spamDirectory)/src")
-        call("git clone \(module.path) \(module.installPath)")
-    }
-
-    if let sourceFiles = filesOfType("swift", atPath: ".") {
-        for file in split(sourceFiles, isSeparator: { $0 == " " }) {
-            let modules = findModules(file)
-            for module in modules {
-                if !fileManager.fileExistsAtPath(module.installPath) {
-                    install(module)
-                }
-            }
-        }
-    } else {
-        error("could not find any Swift files in the current directory")
-    }
-}
-
-func uninstall() {
-    call("rm -rf \(spamDirectory)")
 }
 
 func compile(modules: [Module]) -> String {
@@ -93,6 +67,34 @@ func compile(module: Module) {
     } else {
         error("could not find any Swift files in \(path)")
     }
+}
+
+// MARK: subcommands
+
+func install() {
+    let fileManager = NSFileManager()
+
+    func install(module: Module) {
+        mkdir("\(spamDirectory)/src")
+        call("git clone \(module.path) \(module.installPath)")
+    }
+
+    if let sourceFiles = filesOfType("swift", atPath: ".") {
+        for file in split(sourceFiles, isSeparator: { $0 == " " }) {
+            let modules = findModules(file)
+            for module in modules {
+                if !fileManager.fileExistsAtPath(module.installPath) {
+                    install(module)
+                }
+            }
+        }
+    } else {
+        error("could not find any Swift files in the current directory")
+    }
+}
+
+func uninstall() {
+    call("rm -rf \(spamDirectory)")
 }
 
 func usage() {
