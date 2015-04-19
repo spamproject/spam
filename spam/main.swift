@@ -104,7 +104,6 @@ func compile() {
         }
         if count(modules) > 0 {
             let finalCompilationCommand = compile(modules)
-            println(finalCompilationCommand)
             call(finalCompilationCommand)
         } else {
             error("could not find any installable modules")
