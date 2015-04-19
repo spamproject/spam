@@ -97,6 +97,21 @@ func uninstall() {
     call("rm -rf \(spamDirectory)")
 }
 
+func compile() {
+    if let sourceFiles = filesOfType("swift", atPath: ".") {
+        var finalCompilationCommand: String?
+        for file in split(sourceFiles, isSeparator: { $0 == " " }) {
+            let modules = findModules(file)
+            finalCompilationCommand = compile(modules)
+        }
+        if finalCompilationCommand != nil {
+            call(finalCompilationCommand!)
+        }
+    } else {
+        error("could not find any installable modules")
+    }
+}
+
 func usage() {
     println("usage: spam [install|uninstall|compile]")
     println("")
@@ -110,18 +125,7 @@ if contains(Process.arguments, "install") || contains(Process.arguments, "i") {
 } else if contains(Process.arguments, "uninstall") || contains(Process.arguments, "u") {
     uninstall()
 } else if contains(Process.arguments, "compile") || contains(Process.arguments, "c") {
-    if let sourceFiles = filesOfType("swift", atPath: ".") {
-        var finalCompilationCommand: String?
-        for file in split(sourceFiles, isSeparator: { $0 == " " }) {
-            let modules = findModules(file)
-            finalCompilationCommand = compile(modules)
-        }
-        if finalCompilationCommand != nil {
-            call(finalCompilationCommand!)
-        }
-    } else {
-        error("could not find any installable modules")
-    }
+    compile()
 } else {
     usage()
 }
