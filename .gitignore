@@ -1,3 +1,7 @@
-spam/spam
-example/example
+# Spam working directory
 .spam
+
+# Binaries
+spam
+example
+main
