@@ -63,7 +63,7 @@ func isBlank(string: String) -> Bool {
         .whitespaceAndNewlineCharacterSet()).isEmpty
 }
 
-func error(message: String) {
+@noreturn func error(message: String) {
     println("error: \(message)")
     exit(1)
 }

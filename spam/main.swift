@@ -41,7 +41,6 @@ func compile(modules: [Module]) -> String {
         return "\(command) \(sourceFiles)"
     } else {
         error("could not find any Swift files in the current directory")
-        return "" // never called; to make the compiler happy
     }
 }
 
