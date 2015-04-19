@@ -3,27 +3,27 @@ import Foundation
 let spamDirectory = ".spam"
 let swiftc = "xcrun -sdk macosx swiftc"
 
-private extension Repo {
+private extension Module {
     var installPath: String {
         get {
-            return spamDirectory + "/src/" + username + "/" + reponame
+            return spamDirectory + "/src/" + username + "/" + moduleName
         }
     }
 }
 
-func findRepos(path: String) -> [Repo] {
-    var repos = [Repo]()
+func findModules(path: String) -> [Module] {
+    var modules = [Module]()
     if let streamReader = StreamReader(path: path) {
         var line: String?
         while let line = streamReader.nextLine() {
-            if let repo = Repo(importStatement: line) {
-                repos.append(repo)
+            if let module = Module(importStatement: line) {
+                modules.append(module)
             }
         }
     } else {
         error("could not read \(path)")
     }
-    return repos
+    return modules
 }
 
 // MARK: subcommands
@@ -31,17 +31,17 @@ func findRepos(path: String) -> [Repo] {
 func install() {
     let fileManager = NSFileManager()
 
-    func install(repo: Repo) {
+    func install(module: Module) {
         mkdir("\(spamDirectory)/src")
-        call("git clone \(repo.path) \(repo.installPath)")
+        call("git clone \(module.path) \(module.installPath)")
     }
 
     if let sourceFiles = filesOfType("swift", atPath: ".") {
         for file in split(sourceFiles, isSeparator: { $0 == " " }) {
-            let repos = findRepos(file)
-            for repo in repos {
-                if !fileManager.fileExistsAtPath(repo.installPath) {
-                    install(repo)
+            let modules = findModules(file)
+            for module in modules {
+                if !fileManager.fileExistsAtPath(module.installPath) {
+                    install(module)
                 }
             }
         }
@@ -54,14 +54,14 @@ func uninstall() {
     call("rm -rf \(spamDirectory)")
 }
 
-func compile(repos: [Repo]) -> String {
+func compile(modules: [Module]) -> String {
     let s = spamDirectory
     mkdir("\(s)/lib")
 
     var command = "\(swiftc) -I \(s)/lib -L \(s)/lib "
-    for repo in repos {
-        compile(repo)
-        command += "-l\(repo.reponame.lowercaseString) "
+    for module in modules {
+        compile(module)
+        command += "-l\(module.moduleName.lowercaseString) "
     }
     if let sourceFiles = filesOfType("swift", atPath: ".") {
         return "\(command) \(sourceFiles)"
@@ -71,10 +71,10 @@ func compile(repos: [Repo]) -> String {
     }
 }
 
-func compile(repo: Repo) {
-    let M = repo.reponame // Module
-    let m = repo.reponame.lowercaseString // module
-    let u = repo.username
+func compile(module: Module) {
+    let M = module.moduleName // Module
+    let m = module.moduleName.lowercaseString // module
+    let u = module.username
     let s = spamDirectory
 
     let path = "\(s)/src/\(u)/\(M)/\(M)"
@@ -98,7 +98,7 @@ func compile(repo: Repo) {
 func usage() {
     println("usage: spam [install|uninstall|compile]")
     println("")
-    println("Specify a package with \"import Module // username/repo\".")
+    println("Specify a package with \"import Module // username/module\".")
 }
 
 // MARK: entry point
@@ -111,8 +111,8 @@ if contains(Process.arguments, "install") || contains(Process.arguments, "i") {
     if let sourceFiles = filesOfType("swift", atPath: ".") {
         var finalCompilationCommand: String?
         for file in split(sourceFiles, isSeparator: { $0 == " " }) {
-            let repos = findRepos(file)
-            finalCompilationCommand = compile(repos)
+            let modules = findModules(file)
+            finalCompilationCommand = compile(modules)
         }
         if finalCompilationCommand != nil {
             call(finalCompilationCommand!)

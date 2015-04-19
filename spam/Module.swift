@@ -1,15 +1,15 @@
-class Repo {
+class Module {
     let username: String
-    let reponame: String
+    let moduleName: String
     var path: String {
         get {
-            return "https://github.com/\(username)/\(reponame).git"
+            return "https://github.com/\(username)/\(moduleName).git"
         }
     }
 
-    init(username: String, reponame: String) {
+    init(username: String, moduleName: String) {
         self.username = username
-        self.reponame = reponame
+        self.moduleName = moduleName
     }
 
     convenience init?(importStatement: String) {
@@ -20,12 +20,12 @@ class Repo {
             let name = importStatement.substringWithRange(nameRange)
             let components = name.componentsSeparatedByString("/")
             if components.count == 2 {
-                self.init(username: components[0], reponame: components[1])
+                self.init(username: components[0], moduleName: components[1])
                 return
             }
         }
 
-        self.init(username: "", reponame: "")
+        self.init(username: "", moduleName: "")
         return nil
     }
 }
