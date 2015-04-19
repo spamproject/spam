@@ -52,15 +52,17 @@ func compile(module: Module) {
     let u = module.username
     let s = spamDirectory
 
-    let path = "\(s)/src/\(u)/\(M)/\(M)"
-    if let sourceFiles = filesOfType("swift", atPath: path) {
+    let path = "\(s)/src/\(u)/\(M)"
+    var sourceFiles = filesOfType("swift", atPath: "\(path)/\(M)")
+    ?? filesOfType("swift", atPath: "\(path)/Source")
+    if sourceFiles != nil {
         call("\(swiftc) -emit-library -emit-object " +
-             "\(sourceFiles) -module-name \(M)")
+             "\(sourceFiles!) -module-name \(M)")
         if let objectFiles = filesOfType("o", atPath: ".") {
             call("ar rcs lib\(m).a \(objectFiles)")
             call("rm \(objectFiles)")
             call("mv lib\(m).a \(s)/lib/")
-            call("\(swiftc) -emit-module \(sourceFiles) " +
+            call("\(swiftc) -emit-module \(sourceFiles!) " +
                  "-module-name \(M) -o \(s)/lib/")
         } else {
             error("could not find object files")
