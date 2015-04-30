@@ -8,7 +8,7 @@ let swiftc = "xcrun -sdk macosx swiftc"
 private extension Module {
     var installPath: String {
         get {
-            return spamDirectory + "/src/" + username + "/" + moduleName
+            return spamDirectory + "/src/" + username + "/" + repo
         }
     }
 }
@@ -47,14 +47,17 @@ func compile(modules: [Module]) -> String {
 }
 
 func compile(module: Module) {
-    let M = module.moduleName // Module
-    let m = module.moduleName.lowercaseString // module
-    let u = module.username
     let s = spamDirectory
+    let u = module.username
+    let r = module.repo
+    let M = module.moduleName // Module
+    let m = module.moduleName // module
 
-    let path = "\(s)/src/\(u)/\(M)"
-    var sourceFiles = filesOfType("swift", atPath: "\(path)/\(M)")
+    let path = "\(s)/src/\(u)/\(r)"
+    var sourceFiles = filesOfType("swift", atPath: "\(path)/\(r)")
+    ?? filesOfType("swift", atPath: "\(path)/\(m)")
     ?? filesOfType("swift", atPath: "\(path)/Source")
+    ?? filesOfType("swift", atPath: "\(path)/src")
     if sourceFiles != nil {
         call("\(swiftc) -emit-library -emit-object " +
              "\(sourceFiles!) -module-name \(M)")

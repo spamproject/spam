@@ -1,15 +1,21 @@
 class Module {
     let username: String
-    let moduleName: String
+    let repo: String
+    var moduleName: String {
+        get {
+            return repo.stringByReplacingOccurrencesOfString(".swift",
+                withString: "", options: .LiteralSearch, range: nil)
+        }
+    }
     var path: String {
         get {
-            return "https://github.com/\(username)/\(moduleName).git"
+            return "https://github.com/\(username)/\(repo).git"
         }
     }
 
-    init(username: String, moduleName: String) {
+    init(username: String, repo: String) {
         self.username = username
-        self.moduleName = moduleName
+        self.repo = repo
     }
 
     convenience init?(importStatement: String) {
@@ -20,12 +26,12 @@ class Module {
             let name = importStatement.substringWithRange(nameRange)
             let components = name.componentsSeparatedByString("/")
             if components.count == 2 {
-                self.init(username: components[0], moduleName: components[1])
+                self.init(username: components[0], repo: components[1])
                 return
             }
         }
 
-        self.init(username: "", moduleName: "")
+        self.init(username: "", repo: "")
         return nil
     }
 }
