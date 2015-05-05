@@ -56,6 +56,7 @@ func compile(module: Module) {
     ?? filesOfType("swift", atPath: "\(path)/\(m)")
     ?? filesOfType("swift", atPath: "\(path)/Source")
     ?? filesOfType("swift", atPath: "\(path)/src")
+    ?? filesOfType("swift", atPath: "\(path)")
     if sourceFiles != nil {
         call("\(swiftc) -emit-library -emit-object " +
              "\(sourceFiles!) -module-name \(M)")
