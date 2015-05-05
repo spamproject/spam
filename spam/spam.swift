@@ -48,8 +48,8 @@ func compile(module: Module) {
     let s = spamDirectory
     let u = module.username
     let r = module.repo
-    let M = module.moduleName // Module
-    let m = module.moduleName // module
+    let M = module.moduleName
+    let m = module.moduleName.lowercaseString
 
     let path = "\(s)/src/\(u)/\(r)"
     var sourceFiles = filesOfType("swift", atPath: "\(path)/\(r)")
