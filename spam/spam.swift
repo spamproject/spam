@@ -121,3 +121,8 @@ func compile(#outputFile: String?) {
         error("could not find any Swift files in the current directory")
     }
 }
+
+func build(#outputFile: String?) {
+    install()
+    compile(outputFile: outputFile)
+}

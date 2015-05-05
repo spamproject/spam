@@ -20,8 +20,7 @@ Requires the latest stable version of Swift.
 If you have an older version of spam already installed:
 ``` bash
 cd spam
-spam -i
-spam -co spam
+spam --build --output spam
 ```
 
 Otherwise:
