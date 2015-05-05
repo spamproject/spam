@@ -2,5 +2,5 @@
 .spam
 
 # Binaries
-spam
-main
+spam/spam
+spam/main
