@@ -1,6 +1,9 @@
+import Foundation
+
 class Module {
     let username: String
     let repo: String
+    var version: String?
     var moduleName: String {
         get {
             return repo.stringByReplacingOccurrencesOfString(".swift",
@@ -13,9 +16,10 @@ class Module {
         }
     }
 
-    init(username: String, repo: String) {
+    init(username: String, repo: String, version: String? = nil) {
         self.username = username
         self.repo = repo
+        self.version = version
     }
 
     convenience init?(importStatement: String) {
@@ -24,9 +28,16 @@ class Module {
         let nameRange = importStatement.rangeOfString("[^\\s/]+/[^\\s/]+$",
         options: .RegularExpressionSearch) {
             let name = importStatement.substringWithRange(nameRange)
-            let components = name.componentsSeparatedByString("/")
+            let components = name.componentsSeparatedByCharactersInSet(
+                NSCharacterSet(charactersInString:":/")) // 😕
+
             if components.count == 2 {
                 self.init(username: components[0], repo: components[1])
+                return
+            } else if components.count == 3 {
+                self.init(username: components[0],
+                    repo: components[1],
+                    version: components[2])
                 return
             }
         }
