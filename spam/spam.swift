@@ -82,6 +82,10 @@ func install() {
     func install(module: Module) {
         mkdir("\(spamDirectory)/src")
         call("git clone \(module.path) \(module.installPath)")
+        if let version = module.version {
+            call("git --git-dir=\(module.installPath)/.git " +
+                 "--work-tree=\(module.installPath) checkout \(version) -q")
+        }
     }
 
     if let sourceFiles = filesOfType("swift", atPath: ".") {
