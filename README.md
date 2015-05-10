@@ -26,11 +26,7 @@ spam --build --output spam
 Otherwise:
 ``` bash
 cd spam
-git checkout bootstrap
-xcrun -sdk macosx swiftc *.swift -o spam
-git checkout master
-./spam install
-./spam compile
+./bootstrap.sh
 ```
 
 Then put spam somewhere on your path, e.g. `mv spam /usr/local/bin`.
