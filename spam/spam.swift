@@ -112,15 +112,11 @@ func compile(#outputFile: String?) {
         for file in split(sourceFiles, isSeparator: { $0 == " " }) {
             modules += findModules(file)
         }
-        if count(modules) > 0 {
-            let finalCompilationCommand = compile(modules)
-            if outputFile != nil {
-                call("\(finalCompilationCommand) -o \(outputFile!)")
-            } else {
-                call(finalCompilationCommand)
-            }
+        let finalCompilationCommand = compile(modules)
+        if outputFile != nil {
+            call("\(finalCompilationCommand) -o \(outputFile!)")
         } else {
-            error("could not find any installable modules")
+            call(finalCompilationCommand)
         }
     } else {
         error("could not find any Swift files in the current directory")
