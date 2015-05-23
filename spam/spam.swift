@@ -64,7 +64,7 @@ func compile(module: Module) {
             call("ar rcs lib\(m).a \(objectFiles)")
             call("rm \(objectFiles)")
             call("mv lib\(m).a \(s)/lib/")
-            call("\(swiftc) -emit-module \(sourceFiles!) " +
+            call("\(swiftc) -parse-as-library -emit-module \(sourceFiles!) " +
                  "-module-name \(M) -o \(s)/lib/")
         } else {
             error("could not find object files")
