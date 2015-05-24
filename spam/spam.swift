@@ -115,9 +115,9 @@ func compile(#outputFile: String?) {
             modules += findModules(file)
         }
         let finalCompilationCommand = compile(modules)
-        if outputFile != nil {
+        if let outputFile = outputFile {
             log("Compiling \(outputFile)…")
-            call("\(finalCompilationCommand) -o \(outputFile!)")
+            call("\(finalCompilationCommand) -o \(outputFile)")
         } else {
             log("Compiling main…")
             call(finalCompilationCommand)
