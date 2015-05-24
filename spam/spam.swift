@@ -1,7 +1,8 @@
 import Foundation
 
-let spamDirectory = ".spam"
-let swiftc = "xcrun -sdk macosx swiftc"
+private let fileManager = NSFileManager()
+private let spamDirectory = ".spam"
+private let swiftc = "xcrun -sdk macosx swiftc"
 
 private extension Module {
     var installPath: String {
@@ -34,11 +35,14 @@ func compile(modules: [Module]) -> String {
 
     var command = "\(swiftc) -I \(s)/lib -L \(s)/lib "
     for module in modules {
-        compile(module)
+        let modulePath = "\(spamDirectory)/lib/\(module.moduleName).swiftmodule"
+        if !fileManager.fileExistsAtPath(modulePath) {
+            compile(module)
+        }
         command += "-l\(module.moduleName.lowercaseString) "
     }
     if let sourceFiles = filesOfType("swift", atPath: ".") {
-        return "\(command) \(sourceFiles)"
+        return "\(command)\(sourceFiles)"
     } else {
         error("could not find any Swift files in the current directory")
     }
@@ -78,8 +82,6 @@ func compile(module: Module) {
 // MARK: subcommands
 
 func install() {
-    let fileManager = NSFileManager()
-
     func install(module: Module) {
         mkdir("\(spamDirectory)/src")
         call("git clone \(module.path) \(module.installPath)")
