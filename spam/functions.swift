@@ -1,6 +1,14 @@
 import Foundation
 
+@inline(never) func log<T>(value: T, level: Int = 1) {
+    if verboseOption.value == level {
+        println(value)
+    }
+}
+
 func call(command: String) {
+    log(command, level: 2)
+
     let task = NSTask()
     task.launchPath = "/usr/bin/env"
     task.arguments = split(command) { $0 == " " }
@@ -24,6 +32,8 @@ func call(command: String) {
 
 private let fileManager = NSFileManager()
 func mkdir(path: String, withIntermediateDirectories: Bool = true) {
+    log("mkdir -p \(path)", level: 2)
+
     var error: NSError?
     fileManager.createDirectoryAtPath(
         path,

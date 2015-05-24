@@ -14,10 +14,14 @@ let outputOption = StringOption(shortFlag: "o", longFlag: "output", required: fa
     helpMessage: "Write output to <file>.")
 let uninstallOption = BoolOption(shortFlag: "u", longFlag: "uninstall",
     helpMessage: "Completely remove the .spam directory.")
+let verboseOption = CounterOption(shortFlag: "v", longFlag: "verbose",
+    helpMessage: "Print each compilation step to stdout. -v prints logical steps, and -vv\n" +
+    "      prints physical steps.")
 let helpOption = BoolOption(shortFlag: "h", longFlag: "help",
     helpMessage: "Display this help message and exit.")
 cli.addOptions(installOption, compileOption, buildOption,
-               outputOption, uninstallOption, helpOption)
+               outputOption, uninstallOption, verboseOption,
+               helpOption)
 
 let (success, error) = cli.parse()
 if (!success) {

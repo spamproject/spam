@@ -45,6 +45,7 @@ func compile(modules: [Module]) -> String {
 }
 
 func compile(module: Module) {
+    log("Compiling \(module.moduleName)…")
     let s = spamDirectory
     let u = module.username
     let r = module.repo
@@ -103,6 +104,7 @@ func install() {
 }
 
 func uninstall() {
+    log("Removing .spam/ and its contents…")
     call("rm -rf \(spamDirectory)")
 }
 
@@ -114,8 +116,10 @@ func compile(#outputFile: String?) {
         }
         let finalCompilationCommand = compile(modules)
         if outputFile != nil {
+            log("Compiling \(outputFile)…")
             call("\(finalCompilationCommand) -o \(outputFile!)")
         } else {
+            log("Compiling main…")
             call(finalCompilationCommand)
         }
     } else {
