@@ -121,7 +121,7 @@ func compile(#outputFile: String?) {
             log("Compiling \(outputFile)…")
             call("\(finalCompilationCommand) -o \(outputFile)")
         } else {
-            log("Compiling main…")
+            log("Compiling project…")
             call(finalCompilationCommand)
         }
     } else {
