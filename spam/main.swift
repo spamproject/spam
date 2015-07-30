@@ -1,4 +1,4 @@
-import CommandLine // jatoben/CommandLine
+import CommandLine // jatoben/CommandLine:v1.2.0
 
 let cli = CommandLine()
 let installOption = BoolOption(shortFlag: "i", longFlag: "install", helpMessage:
