@@ -2,7 +2,7 @@ import Foundation
 
 @inline(never) func log<T>(value: T, level: Int = 1) {
     if verboseOption.value == level {
-        println(value)
+        print(value)
     }
 }
 
@@ -11,7 +11,7 @@ func call(command: String) {
 
     let task = NSTask()
     task.launchPath = "/usr/bin/env"
-    task.arguments = split(command) { $0 == " " }
+    task.arguments = split(command.characters) { $0 == " " }.map(String.init)
 
     let pipe = NSPipe()
     task.standardOutput = pipe
@@ -19,7 +19,7 @@ func call(command: String) {
 
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
     if let output = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
-        print(output)
+        print(output, appendNewline: false)
     } else {
         error("could not get output of \(command)")
     }
@@ -34,33 +34,34 @@ private let fileManager = NSFileManager()
 func mkdir(path: String, withIntermediateDirectories: Bool = true) {
     log("mkdir -p \(path)", level: 2)
 
-    var error: NSError?
-    fileManager.createDirectoryAtPath(
-        path,
-        withIntermediateDirectories: withIntermediateDirectories,
-        attributes: nil,
-        error: &error)
-    if error != nil {
-        println(error)
+    do {
+        try fileManager.createDirectoryAtPath(
+            path,
+            withIntermediateDirectories: withIntermediateDirectories,
+            attributes: nil)
+    } catch {
+        print(error)
         exit(1)
     }
 }
 
 // Returns a space-separated list of .type files at path.
 func filesOfType(type: String, atPath path: String) -> String? {
-    if let contents: [String] = fileManager.contentsOfDirectoryAtPath(path, error: nil) as? [String] {
-        let predicate = NSPredicate(format: "pathExtension='\(type)'")
-        let filesArray = contents.filter { predicate.evaluateWithObject($0) }
-
-        var fullPathFilesArray = [String]()
-        for file in filesArray {
-            fullPathFilesArray.append("\(path)/\(file)")
-        }
-        let files = join(" ", fullPathFilesArray)
-        return files
+    let contents: [String]
+    do {
+        contents = try fileManager.contentsOfDirectoryAtPath(path)
+    } catch {
+        return nil
     }
+    let predicate = NSPredicate(format: "pathExtension='\(type)'")
+    let filesArray = contents.filter { predicate.evaluateWithObject($0) }
 
-    return nil
+    var fullPathFilesArray = [String]()
+    for file in filesArray {
+        fullPathFilesArray.append("\(path)/\(file)")
+    }
+    let files = " ".join(fullPathFilesArray)
+    return files
 }
 
 func lastIndexOf(target: UnicodeScalar, inString string: String) -> Int? {
@@ -77,6 +78,6 @@ func isBlank(string: String) -> Bool {
 }
 
 @noreturn func error(message: String) {
-    println("error: \(message)")
+    print("error: \(message)")
     exit(1)
 }

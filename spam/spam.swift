@@ -17,7 +17,6 @@ private extension Module {
 func findModules(path: String) -> [Module] {
     var modules = [Module]()
     if let streamReader = StreamReader(path: path) {
-        var line: String?
         while let line = streamReader.nextLine() {
             if let module = Module(importStatement: line) {
                 modules.append(module)
@@ -57,11 +56,11 @@ func compile(module: Module) {
     let m = module.moduleName.lowercaseString
 
     let path = "\(s)/src/\(u)/\(r)"
-    var sourceFiles = filesOfType("swift", atPath: "\(path)/\(r)")
-    ?? filesOfType("swift", atPath: "\(path)/\(m)")
-    ?? filesOfType("swift", atPath: "\(path)/Source")
-    ?? filesOfType("swift", atPath: "\(path)/src")
-    ?? filesOfType("swift", atPath: "\(path)")
+    let sourceFiles = filesOfType("swift", atPath: "\(path)/\(r)")
+        ?? filesOfType("swift", atPath: "\(path)/\(m)")
+        ?? filesOfType("swift", atPath: "\(path)/Source")
+        ?? filesOfType("swift", atPath: "\(path)/src")
+        ?? filesOfType("swift", atPath: "\(path)")
     if sourceFiles != nil {
         call("\(swiftc) -emit-library -emit-object " +
              "\(sourceFiles!) -module-name \(M)")
@@ -92,7 +91,7 @@ func install() {
     }
 
     if let sourceFiles = filesOfType("swift", atPath: ".") {
-        for file in split(sourceFiles, isSeparator: { $0 == " " }) {
+        for file in (split(sourceFiles.characters) { $0 == " " }.map(String.init)) {
             let modules = findModules(file)
             for module in modules {
                 if !fileManager.fileExistsAtPath(module.installPath) {
@@ -110,10 +109,10 @@ func uninstall() {
     call("rm -rf \(spamDirectory)")
 }
 
-func compile(#outputFile: String?) {
+func compile(outputFile outputFile: String?) {
     if let sourceFiles = filesOfType("swift", atPath: ".") {
         var modules = [Module]()
-        for file in split(sourceFiles, isSeparator: { $0 == " " }) {
+        for file in (split(sourceFiles.characters) { $0 == " " }.map(String.init)) {
             modules += findModules(file)
         }
         let finalCompilationCommand = compile(modules)
@@ -129,7 +128,7 @@ func compile(#outputFile: String?) {
     }
 }
 
-func build(#outputFile: String?) {
+func build(outputFile outputFile: String?) {
     install()
     compile(outputFile: outputFile)
 }

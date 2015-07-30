@@ -1,4 +1,4 @@
-import CommandLine // jatoben/CommandLine:v1.2.0
+import CommandLine // jatoben/CommandLine:59816c0
 
 let cli = CommandLine()
 let installOption = BoolOption(shortFlag: "i", longFlag: "install", helpMessage:
@@ -24,10 +24,10 @@ cli.addOptions(installOption, compileOption, buildOption,
                outputOption, uninstallOption, verboseOption,
                helpOption)
 
-let (success, error) = cli.parse()
-if (!success) {
-    println(error!)
-    cli.printUsage()
+do {
+    try cli.parse()
+} catch {
+    cli.printUsage(error)
     exit(EX_USAGE)
 }
 
