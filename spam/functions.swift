@@ -18,11 +18,10 @@ func call(command: String) {
     task.launch()
 
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
-    if let output = NSString(data: data, encoding: NSUTF8StringEncoding) as? String {
-        print(output, appendNewline: false)
-    } else {
+    guard let output = NSString(data: data, encoding: NSUTF8StringEncoding) as? String else {
         error("could not get output of \(command)")
     }
+    print(output, appendNewline: false)
 
     task.waitUntilExit()
     if task.terminationStatus != 0 {

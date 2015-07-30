@@ -15,15 +15,14 @@ private extension Module {
 // MARK: helper functions
 
 func findModules(path: String) -> [Module] {
-    var modules = [Module]()
-    if let streamReader = StreamReader(path: path) {
-        while let line = streamReader.nextLine() {
-            if let module = Module(importStatement: line) {
-                modules.append(module)
-            }
-        }
-    } else {
+    guard let streamReader = StreamReader(path: path) else {
         error("could not read \(path)")
+    }
+    var modules = [Module]()
+    while let line = streamReader.nextLine() {
+        if let module = Module(importStatement: line) {
+            modules.append(module)
+        }
     }
     return modules
 }
@@ -40,11 +39,10 @@ func compile(modules: [Module]) -> String {
         }
         command += "-l\(module.moduleName.lowercaseString) "
     }
-    if let sourceFiles = filesOfType("swift", atPath: ".") {
-        return "\(command)\(sourceFiles)"
-    } else {
+    guard let sourceFiles = filesOfType("swift", atPath: ".") else {
         error("could not find any Swift files in the current directory")
     }
+    return "\(command)\(sourceFiles)"
 }
 
 func compile(module: Module) {
@@ -56,26 +54,23 @@ func compile(module: Module) {
     let m = module.moduleName.lowercaseString
 
     let path = "\(s)/src/\(u)/\(r)"
-    let sourceFiles = filesOfType("swift", atPath: "\(path)/\(r)")
+    guard let sourceFiles = filesOfType("swift", atPath: "\(path)/\(r)")
         ?? filesOfType("swift", atPath: "\(path)/\(m)")
         ?? filesOfType("swift", atPath: "\(path)/Source")
         ?? filesOfType("swift", atPath: "\(path)/src")
-        ?? filesOfType("swift", atPath: "\(path)")
-    if sourceFiles != nil {
-        call("\(swiftc) -emit-library -emit-object " +
-             "\(sourceFiles!) -module-name \(M)")
-        if let objectFiles = filesOfType("o", atPath: ".") {
-            call("ar rcs lib\(m).a \(objectFiles)")
-            call("rm \(objectFiles)")
-            call("mv lib\(m).a \(s)/lib/")
-            call("\(swiftc) -parse-as-library -emit-module \(sourceFiles!) " +
-                 "-module-name \(M) -o \(s)/lib/")
-        } else {
-            error("could not find object files")
-        }
-    } else {
-        error("could not find any Swift files in \(path)")
+        ?? filesOfType("swift", atPath: "\(path)") else {
+            error("could not find any Swift files in \(path)")
     }
+    call("\(swiftc) -emit-library -emit-object " +
+         "\(sourceFiles) -module-name \(M)")
+    guard let objectFiles = filesOfType("o", atPath: ".") else {
+        error("could not find object files")
+    }
+    call("ar rcs lib\(m).a \(objectFiles)")
+    call("rm \(objectFiles)")
+    call("mv lib\(m).a \(s)/lib/")
+    call("\(swiftc) -parse-as-library -emit-module \(sourceFiles) " +
+         "-module-name \(M) -o \(s)/lib/")
 }
 
 // MARK: subcommands
@@ -90,17 +85,16 @@ func install() {
         }
     }
 
-    if let sourceFiles = filesOfType("swift", atPath: ".") {
-        for file in (split(sourceFiles.characters) { $0 == " " }.map(String.init)) {
-            let modules = findModules(file)
-            for module in modules {
-                if !fileManager.fileExistsAtPath(module.installPath) {
-                    install(module)
-                }
+    guard let sourceFiles = filesOfType("swift", atPath: ".")  else {
+        error("could not find any Swift files in the current directory")
+    }
+    for file in (split(sourceFiles.characters) { $0 == " " }.map(String.init)) {
+        let modules = findModules(file)
+        for module in modules {
+            if !fileManager.fileExistsAtPath(module.installPath) {
+                install(module)
             }
         }
-    } else {
-        error("could not find any Swift files in the current directory")
     }
 }
 
@@ -110,21 +104,20 @@ func uninstall() {
 }
 
 func compile(outputFile outputFile: String?) {
-    if let sourceFiles = filesOfType("swift", atPath: ".") {
-        var modules = [Module]()
-        for file in (split(sourceFiles.characters) { $0 == " " }.map(String.init)) {
-            modules += findModules(file)
-        }
-        let finalCompilationCommand = compile(modules)
-        if let outputFile = outputFile {
-            log("Compiling \(outputFile)…")
-            call("\(finalCompilationCommand) -o \(outputFile)")
-        } else {
-            log("Compiling project…")
-            call(finalCompilationCommand)
-        }
-    } else {
+    guard let sourceFiles = filesOfType("swift", atPath: ".") else {
         error("could not find any Swift files in the current directory")
+    }
+    var modules = [Module]()
+    for file in (split(sourceFiles.characters) { $0 == " " }.map(String.init)) {
+        modules += findModules(file)
+    }
+    let finalCompilationCommand = compile(modules)
+    if let outputFile = outputFile {
+        log("Compiling \(outputFile)…")
+        call("\(finalCompilationCommand) -o \(outputFile)")
+    } else {
+        log("Compiling project…")
+        call(finalCompilationCommand)
     }
 }
 
